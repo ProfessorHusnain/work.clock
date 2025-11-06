@@ -9,6 +9,31 @@
 - **Styling**: Tailwind CSS 4, shadcn/ui components
 - **Theme**: next-themes with light/dark mode support
 
+## Features
+
+### 🕐 Analog Clocks
+- Beautiful analog clocks with real-time updates
+- Three size options: Extra Small, Small, and Large
+- Dynamic responsive grid layout
+
+### 🌍 Timezone Management
+- Add unlimited timezones to track
+- Search from a comprehensive database of world timezones
+- Download additional timezones on-demand from public API
+- Real-time UTC offset calculation
+- Automatic DST (Daylight Saving Time) detection and indicator
+
+### 🎨 Appearance
+- Dark mode / Light mode support
+- Smooth animations and transitions
+- Hover effects and interactive UI
+- Modern shadcn/ui components
+
+### 💾 Data Persistence
+- Context-aware storage (localStorage for web, Electron IPC for desktop)
+- Automatic saving of preferences (clock size, selected timezones, custom labels, label visibility)
+- Offline-first architecture
+
 ## Getting Started
 
 ### Prerequisites

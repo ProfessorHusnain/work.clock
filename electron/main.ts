@@ -1,5 +1,6 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import * as path from "path";
+import * as fs from "fs/promises";
 
 const createWindow = async (): Promise<void> => {
   const win = new BrowserWindow({
@@ -49,6 +50,56 @@ app.on("window-all-closed", () => {
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
+  }
+});
+
+// Storage IPC handlers
+const getStoragePath = () => {
+  return path.join(app.getPath("userData"), "storage");
+};
+
+const ensureStorageDir = async () => {
+  const storagePath = getStoragePath();
+  try {
+    await fs.mkdir(storagePath, { recursive: true });
+  } catch (error) {
+    console.error("Error creating storage directory:", error);
+  }
+};
+
+ipcMain.handle("storage:get", async (event, key: string) => {
+  try {
+    await ensureStorageDir();
+    const filePath = path.join(getStoragePath(), `${key}.json`);
+    const data = await fs.readFile(filePath, "utf-8");
+    return data;
+  } catch (error) {
+    // File doesn't exist or error reading
+    return null;
+  }
+});
+
+ipcMain.handle("storage:set", async (event, key: string, value: string) => {
+  try {
+    await ensureStorageDir();
+    const filePath = path.join(getStoragePath(), `${key}.json`);
+    await fs.writeFile(filePath, value, "utf-8");
+  } catch (error) {
+    console.error(`Error writing storage file (${key}):`, error);
+    throw error;
+  }
+});
+
+ipcMain.handle("storage:clear", async () => {
+  try {
+    const storagePath = getStoragePath();
+    const files = await fs.readdir(storagePath);
+    await Promise.all(
+      files.map((file) => fs.unlink(path.join(storagePath, file)))
+    );
+  } catch (error) {
+    console.error("Error clearing storage:", error);
+    throw error;
   }
 });
 

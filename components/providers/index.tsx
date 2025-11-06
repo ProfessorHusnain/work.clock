@@ -1,4 +1,5 @@
 import { ThemeProvider } from "./theme-provider";
+import { TimezoneProvider } from "@/lib/hooks/useTimezones";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -8,7 +9,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      {children}
+      <TimezoneProvider>
+        {children}
+      </TimezoneProvider>
     </ThemeProvider>
   );
 }

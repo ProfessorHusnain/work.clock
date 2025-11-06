@@ -1,18 +1,16 @@
 import { contextBridge, ipcRenderer } from "electron";
 
-// Expose protected methods that allow the renderer process to use
-// the ipcRenderer without exposing the entire object
+// Expose protected methods for storage and IPC
 contextBridge.exposeInMainWorld("electron", {
-  // Add your IPC communication methods here
-  // Example:
-  // send: (channel: string, data: any) => {
-  //   ipcRenderer.send(channel, data);
-  // },
-  // receive: (channel: string, func: (...args: any[]) => void) => {
-  //   ipcRenderer.on(channel, (event, ...args) => func(...args));
-  // },
+  storage: {
+    get: (key: string): Promise<string | null> => 
+      ipcRenderer.invoke("storage:get", key),
+    set: (key: string, value: string): Promise<void> => 
+      ipcRenderer.invoke("storage:set", key, value),
+    clear: (): Promise<void> => 
+      ipcRenderer.invoke("storage:clear"),
+  },
 });
 
-// For now, this is a basic setup. You can expand it as needed.
 export {};
 
