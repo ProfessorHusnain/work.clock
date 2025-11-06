@@ -97,10 +97,38 @@ export function AnalogClock({
     hour12: true,
   });
 
+  // Get text size based on clock size
+  const getTextSize = () => {
+    if (size <= 150) {
+      return {
+        label: "text-sm",
+        digital: "text-sm",
+        timezone: "text-xs",
+        gap: "gap-2",
+      };
+    } else if (size <= 220) {
+      return {
+        label: "text-base",
+        digital: "text-lg",
+        timezone: "text-xs",
+        gap: "gap-3",
+      };
+    } else {
+      return {
+        label: "text-xl",
+        digital: "text-2xl",
+        timezone: "text-sm",
+        gap: "gap-4",
+      };
+    }
+  };
+
+  const textSize = getTextSize();
+
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className={`flex flex-col items-center ${textSize.gap}`}>
       {label && (
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+        <h2 className={`${textSize.label} font-semibold text-gray-900 dark:text-gray-100`}>
           {label}
         </h2>
       )}
@@ -208,15 +236,16 @@ export function AnalogClock({
           />
         </svg>
       </div>
-      <div className="text-2xl font-mono font-semibold text-gray-900 dark:text-gray-100">
+      <div className={`${textSize.digital} font-mono font-semibold text-gray-900 dark:text-gray-100`}>
         {digitalTime}
       </div>
       {timezone !== "UTC" && (
-        <div className="text-sm text-gray-600 dark:text-gray-400">
+        <div className={`${textSize.timezone} text-gray-600 dark:text-gray-400`}>
           {timezone.replace(/_/g, " ")}
         </div>
       )}
     </div>
   );
 }
+
 
