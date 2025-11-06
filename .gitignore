@@ -18,7 +18,10 @@
 /out/
 
 # production
-/build
+/dist
+
+# build resources (keep the directory, ignore specific files if needed)
+# /build - Don't ignore, it contains installer resources
 
 # misc
 .DS_Store

@@ -1,14 +1,67 @@
-appId: "io.github.rbfraphael.electron-next"
-productName: "Electron Next.JS"
-copyright: "Copyright (c) 2023 RBFraphael"
+appId: "com.worldclock.app"
+productName: "World Clock"
+copyright: "Copyright © 2025"
+files:
+  - "dist/**/*"
+  - "out/**/*"
+  - "package.json"
+directories:
+  output: "out"
+  buildResources: "build"
 win:
-  target: ["dir", "portable", "zip"]
-  #icon: "public/next.ico"
+  target:
+    - target: "nsis"
+      arch:
+        - "x64"
+#        - "ia32"
+#    - target: "portable"
+#      arch:
+#        - "x64"
+#    - target: "zip"
+#      arch:
+#        - "x64"
+  artifactName: "${productName}-${version}-windows-${arch}.${ext}"
   signAndEditExecutable: false
-
+nsis:
+  oneClick: false                              # Show installation wizard with options
+  perMachine: false                            # Default to per-user (installer will ask)
+  allowElevation: true                         # Allow user to choose per-machine install
+  allowToChangeInstallationDirectory: true     # Let user choose install location
+  runAfterFinish: true                         # Launch app after installation
+  createDesktopShortcut: true                  # Create desktop shortcut (true/false/"always")
+  createStartMenuShortcut: true                # Always create start menu shortcut
+  shortcutName: "World Clock"                  # Name for shortcuts
+  uninstallDisplayName: "World Clock (Uninstall)"
+  deleteAppDataOnUninstall: true               # Clean up app data on uninstall
+  license: "LICENSE"                           # License file to show during install
+  displayLanguageSelector: true                # Let user choose installer language
+  # Optional: Uncomment and add files to build/ directory
+  # installerIcon: "build/icon.ico"
+  # uninstallerIcon: "build/icon.ico"
+  # installerHeader: "build/installerHeader.bmp"  # 150x57px
+  # installerSidebar: "build/installerSidebar.bmp"  # 164x314px
 linux:
-  target: ["dir", "appimage", "zip"]
-  icon: "resources/icon.png"
+  target:
+    - target: "AppImage"
+      arch:
+        - "x64"
+    - target: "deb"
+      arch:
+        - "x64"
+    - target: "tar.gz"
+      arch:
+        - "x64"
+  artifactName: "${name}-${version}-linux-${arch}.${ext}"
+  category: "Utility"
 mac:
-  target: ["dir", "dmg", "zip"]
-  icon: "resources/icon.icns"
+  target:
+    - target: "dmg"
+      arch:
+        - "x64"
+        - "arm64"
+    - target: "zip"
+      arch:
+        - "x64"
+        - "arm64"
+  artifactName: "${productName}-${version}-mac-${arch}.${ext}"
+  category: "public.app-category.utilities"
