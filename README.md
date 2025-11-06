@@ -7,6 +7,7 @@
 - **Frontend**: Next.js 16, React 19, TypeScript
 - **Desktop**: Electron 39 with TypeScript
 - **Styling**: Tailwind CSS 4, shadcn/ui components
+- **UI Components**: Button, Dialog, Input, Input Group, Item, Empty, Toggle Group, Label, Dropdown Menu from shadcn/ui
 - **Theme**: next-themes with light/dark mode support
 
 ## Features
