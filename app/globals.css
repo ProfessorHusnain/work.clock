@@ -120,3 +120,39 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Electron-specific fixes for drag and drop */
+@layer utilities {
+  /* Fix drag and drop in Electron */
+  .sortable-item {
+    -webkit-user-drag: element;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Prevent text selection during drag */
+  .dragging * {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    pointer-events: none;
+  }
+  
+  /* Ensure cursor changes work in Electron */
+  .cursor-grab {
+    cursor: grab;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  .cursor-grabbing,
+  .cursor-grab:active {
+    cursor: grabbing !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
+  
+  /* Fix for Electron window dragging interference */
+  [data-sortable-handle] {
+    -webkit-app-region: no-drag;
+  }
+}

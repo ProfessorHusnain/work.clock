@@ -4,12 +4,18 @@ import * as fs from "fs/promises";
 
 const createWindow = async (): Promise<void> => {
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 800,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
       contextIsolation: true,
+      // Enable features needed for drag and drop
+      enableBlinkFeatures: 'CSSVariables',
+      // Ensure proper event handling
+      disableBlinkFeatures: '',
+      // Enable hardware acceleration for smooth animations
+      experimentalFeatures: true,
     },
     show: false, // Don't show until ready
   });
