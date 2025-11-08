@@ -349,7 +349,7 @@ snap:
 nodeGypRebuild: false                          # Don't rebuild native modules (electron-builder handles it)
 npmRebuild: true                               # Rebuild native modules
 buildDependenciesFromSource: false             # Use prebuilt binaries when possible
-
+publish: null
 # Protocol Handlers (optional)
 # ============================================================================
 # protocols:

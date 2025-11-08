@@ -4,13 +4,13 @@
   "private": true,
   "description": "Professional desktop application for tracking time across multiple timezones with beautiful analog clocks and real-time updates",
   "author": "Your Name <your.email@example.com>",
-  "homepage": "https://github.com/your-username/world.clock#readme",
+  "homepage": "https://github.com/ProfessorHusnain/world.clock#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/world.clock.git"
+    "url": "https://github.com/ProfessorHusnain/world.clock.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/world.clock/issues"
+    "url": "https://github.com/ProfessorHusnaine/world.clock/issues"
   },
   "keywords": [
     "electron",
