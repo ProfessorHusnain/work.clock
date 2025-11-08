@@ -71,7 +71,7 @@ export function CommandPalette({
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <CommandInput placeholder="Type a command or search..." />
       <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandEmpty />
         
         {/* File Commands */}
         <CommandGroup heading="File">

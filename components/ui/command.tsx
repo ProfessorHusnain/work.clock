@@ -102,14 +102,63 @@ function CommandList({
 }
 
 function CommandEmpty({
+  className,
+  children,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Empty>) {
   return (
     <CommandPrimitive.Empty
       data-slot="command-empty"
-      className="py-6 text-center text-sm"
+      className={cn("py-12", className)}
       {...props}
-    />
+    >
+      {children || (
+        <div className="flex flex-col items-center justify-center px-6">
+          {/* Animated Icon */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-full blur-xl animate-pulse" />
+            <div className="relative flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 border border-gray-300 dark:border-gray-700 shadow-lg">
+              <SearchIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
+            </div>
+          </div>
+
+          {/* Title */}
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            No commands found
+          </h3>
+
+          {/* Description */}
+          <p className="text-gray-700 dark:text-gray-400 text-center max-w-sm mb-6 text-sm">
+            We couldn't find any commands matching your search. Try a different keyword or browse available commands.
+          </p>
+
+          {/* Suggestions */}
+          <div className="w-full max-w-md space-y-2">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50">
+              <div className="flex-shrink-0">
+                <div className="h-5 w-5 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <span className="text-blue-400 text-[10px] font-semibold">💡</span>
+                </div>
+              </div>
+              <p className="text-xs text-gray-700 dark:text-gray-400">
+                <span className="text-gray-900 dark:text-gray-300 font-medium">Tip:</span> Use keywords like "theme", "clock", or "export"
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700/50">
+              <div className="flex-shrink-0">
+                <div className="h-5 w-5 rounded-full bg-purple-500/10 flex items-center justify-center">
+                  <span className="text-purple-400 text-[10px] font-semibold">⌨️</span>
+                </div>
+              </div>
+              <p className="text-xs text-gray-700 dark:text-gray-400">
+                <span className="text-gray-900 dark:text-gray-300 font-medium">Shortcut:</span> Press <kbd className="px-1.5 py-0.5 text-[10px] font-semibold bg-gray-200 dark:bg-gray-700 border border-gray-400 dark:border-gray-600 rounded text-gray-800 dark:text-gray-300">Esc</kbd> to close
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </CommandPrimitive.Empty>
   )
 }
 
