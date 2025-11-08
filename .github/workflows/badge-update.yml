@@ -1,0 +1,34 @@
+name: Update Badges
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-badges:
+    name: 🏷️ Update Status Badges
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🏷️ Generate badge data
+        run: |
+          echo "## 🏷️ Badge Status Update" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Badges are automatically generated from workflow status:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build**: ![Build Status](https://github.com/${{ github.repository }}/workflows/Build%20and%20Release/badge.svg)" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR Check**: ![PR Check](https://github.com/${{ github.repository }}/workflows/PR%20Check/badge.svg)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Badge Markdown" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Add these to your README.md:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`markdown" >> $GITHUB_STEP_SUMMARY
+          echo "[![Build and Release](https://github.com/${{ github.repository }}/workflows/Build%20and%20Release/badge.svg)](https://github.com/${{ github.repository }}/actions/workflows/release.yml)" >> $GITHUB_STEP_SUMMARY
+          echo "[![PR Check](https://github.com/${{ github.repository }}/workflows/PR%20Check/badge.svg)](https://github.com/${{ github.repository }}/actions/workflows/pr-check.yml)" >> $GITHUB_STEP_SUMMARY
+          echo "[![GitHub release](https://img.shields.io/github/v/release/${{ github.repository }})](https://github.com/${{ github.repository }}/releases/latest)" >> $GITHUB_STEP_SUMMARY
+          echo "[![License](https://img.shields.io/github/license/${{ github.repository }})](LICENSE)" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+

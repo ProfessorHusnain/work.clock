@@ -1,11 +1,57 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, nativeImage } from "electron";
 import * as path from "path";
 import * as fs from "fs/promises";
+
+/**
+ * Get the application icon as NativeImage
+ * Returns the correct icon based on environment and platform
+ * Uses nativeImage for proper Windows icon handling
+ */
+const getAppIcon = (): Electron.NativeImage => {
+  // Determine icon file based on platform
+  let iconFile: string;
+  
+  if (process.platform === "win32") {
+    iconFile = "icon.ico";
+  } else if (process.platform === "darwin") {
+    iconFile = "icon.icns";
+  } else {
+    // Linux and others
+    iconFile = "world.clock.png";
+  }
+
+  let iconPath: string;
+  
+  if (app.isPackaged) {
+    // Production: icon is in resources folder
+    iconPath = path.join(process.resourcesPath, iconFile);
+  } else {
+    // Development: icon is in build folder
+    // __dirname is dist/electron, so go up two levels to reach project root
+    iconPath = path.join(__dirname, "..", "..", "build", iconFile);
+  }
+  
+  // Log icon path for debugging
+  console.log("Icon path:", iconPath);
+  console.log("Icon exists:", require("fs").existsSync(iconPath));
+  
+  // Create NativeImage from path
+  const icon = nativeImage.createFromPath(iconPath);
+  
+  if (icon.isEmpty()) {
+    console.error("Failed to load icon from path:", iconPath);
+  } else {
+    console.log("Icon loaded successfully, size:", icon.getSize());
+  }
+  
+  return icon;
+};
 
 const createWindow = async (): Promise<void> => {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
+    icon: getAppIcon(), // Set the application icon using nativeImage
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
@@ -45,7 +91,13 @@ const createWindow = async (): Promise<void> => {
   });
 };
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  // Set default app icon (Windows taskbar, etc.)
+  if (process.platform === "win32") {
+    app.setAppUserModelId("com.worldclock.app");
+  }
+  createWindow();
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

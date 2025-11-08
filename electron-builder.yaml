@@ -1,67 +1,420 @@
-appId: "com.worldclock.app"
-productName: "World Clock"
-copyright: "Copyright © 2025"
+# ============================================================================
+# PRODUCTION ELECTRON BUILDER CONFIGURATION
+# World Clock Desktop Application
+# ============================================================================
+
+# Application Metadata
+# ============================================================================
+appId: "com.worldclock.app"                    # Unique application identifier (reverse DNS format)
+productName: "World Clock"                     # Display name for the application
+copyright: "Copyright © 2025"                  # Copyright notice
+asar: true                                     # Archive app into asar (better performance & security)
+compression: "normal"                          # Compression level: store, normal, maximum
+buildVersion: "1.0.0"                              # Build version for internal tracking
+
+# File Inclusion/Exclusion
+# ============================================================================
 files:
-  - "dist/**/*"
-  - "out/**/*"
-  - "package.json"
+  - "dist/**/*"                                # Compiled Electron files
+  - "out/**/*"                                 # Next.js static export
+  - "package.json"                             # Package metadata
+  - "!**/*.map"                                # Exclude source maps
+  - "!**/*.ts"                                 # Exclude TypeScript source files
+  - "!**/*.tsx"                                # Exclude TypeScript React files
+  - "!**/README.md"                            # Exclude README files
+  - "!**/LICENSE"                              # Exclude license from bundle (shown in installer)
+  - "!**/.git"                                 # Exclude git directory
+  - "!**/.gitignore"                           # Exclude git files
+  - "!**/.idea"                                # Exclude IDE files
+  - "!**/.vscode"                              # Exclude VS Code files
+  - "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}"
+  - "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}"
+  - "!**/node_modules/*.d.ts"                  # Exclude TypeScript declarations
+  - "!**/node_modules/.bin"                    # Exclude node binary wrappers
+  - "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}"
+  - "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}"
+  - "!**/{appveyor.yml,.travis.yml,circle.yml}"
+  - "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+
+# Directories
+# ============================================================================
 directories:
-  output: "out"
-  buildResources: "build"
+  output: "dist-release"                       # Output directory for built packages
+  buildResources: "build"                      # Build resources (icons, installers, etc.)
+
+# External Dependencies (exclude from asar)
+# ============================================================================
+asarUnpack:
+  - "**/node_modules/sharp/**/*"               # Native modules
+  - "**/node_modules/electron/**/*"
+
+# Metadata for App Stores & Package Managers
+# ============================================================================
+extraMetadata:
+  main: "dist/electron/main.js"                # Entry point
+
+# ============================================================================
+# WINDOWS CONFIGURATION
+# ============================================================================
 win:
   target:
-    - target: "nsis"
+    - target: "nsis"                           # NSIS installer (recommended)
       arch:
-        - "x64"
-#        - "ia32"
-#    - target: "portable"
+        - "x64"                                # 64-bit Windows
+#        - "arm64"                              # ARM64 Windows (Surface, etc.)
+#    - target: "portable"                       # Portable executable (no install)
 #      arch:
 #        - "x64"
-#    - target: "zip"
+#    - target: "zip"                            # Zip archive for manual install
 #      arch:
 #        - "x64"
+  icon: "build/icon.ico"                       # Windows icon (256x256 minimum)
   artifactName: "${productName}-${version}-windows-${arch}.${ext}"
-  signAndEditExecutable: false
+  requestedExecutionLevel: "asInvoker"         # Don't require admin rights
+  signAndEditExecutable: true                 # Disable for unsigned builds (enable when you have a certificate)
+  verifyUpdateCodeSignature: false             # Disable signature verification for now
+  # Note: When you get a code signing certificate, change above to true and uncomment below:
+  # signtoolOptions:
+  #   publisherName: "Muhammad Husnain"        # Publisher name
+  
+  # Code Signing (IMPORTANT for production)
+  # Uncomment and configure when you have a Windows code signing certificate:
+  # certificateFile: "path/to/certificate.pfx" # Path to certificate
+  # certificatePassword: "${env.WIN_CSC_KEY_PASSWORD}" # Certificate password from env var
+  # OR use:
+  # certificateSubjectName: "Your Company Name" # Subject name on certificate
+  # certificateSha1: "THUMBPRINT"              # Certificate SHA1 thumbprint
+
+# NSIS Installer Configuration (Windows)
+# ============================================================================
 nsis:
-  oneClick: false                              # Show installation wizard with options
-  perMachine: false                            # Default to per-user (installer will ask)
-  allowElevation: true                         # Allow user to choose per-machine install
-  allowToChangeInstallationDirectory: true     # Let user choose install location
+  oneClick: false                              # Show installation wizard
+  perMachine: false                            # Default to per-user install
+  allowElevation: true                         # Allow elevation for per-machine install
+  allowToChangeInstallationDirectory: true     # User can choose install location
   runAfterFinish: true                         # Launch app after installation
-  createDesktopShortcut: true                  # Create desktop shortcut (true/false/"always")
-  createStartMenuShortcut: true                # Always create start menu shortcut
-  shortcutName: "World Clock"                  # Name for shortcuts
-  uninstallDisplayName: "World Clock (Uninstall)"
-  deleteAppDataOnUninstall: true               # Clean up app data on uninstall
-  license: "LICENSE"                           # License file to show during install
-  displayLanguageSelector: true                # Let user choose installer language
-  # Optional: Uncomment and add files to build/ directory
-  # installerIcon: "build/icon.ico"
-  # uninstallerIcon: "build/icon.ico"
-  # installerHeader: "build/installerHeader.bmp"  # 150x57px
-  # installerSidebar: "build/installerSidebar.bmp"  # 164x314px
+  createDesktopShortcut: "always"              # Always create desktop shortcut
+  createStartMenuShortcut: true                # Create start menu shortcut
+  menuCategory: true                           # Create submenu in start menu
+  shortcutName: "World Clock"                  # Shortcut name
+  uninstallDisplayName: "World Clock"          # Name in Control Panel
+  deleteAppDataOnUninstall: true               # Clean up user data on uninstall
+  installerLanguages:                          # Multi-language support
+    - "en_US"
+    - "de_DE"
+    - "fr_FR"
+    - "es_ES"
+    - "it_IT"
+    - "ja_JP"
+    - "ko_KR"
+    - "pt_BR"
+    - "ru_RU"
+    - "zh_CN"
+  license: "LICENSE"                           # License agreement
+  displayLanguageSelector: true                # Language selection dialog
+  
+  # Custom installer assets (recommended for professional look)
+  # Create these images and uncomment:
+  # installerIcon: "build/icon.ico"            # Installer icon (same as app icon)
+  # uninstallerIcon: "build/icon.ico"          # Uninstaller icon
+  # installerHeader: "build/installerHeader.bmp"     # Header image (150x57 pixels)
+  # installerSidebar: "build/installerSidebar.bmp"   # Sidebar image (164x314 pixels)
+  # uninstallerSidebar: "build/uninstallerSidebar.bmp" # Uninstaller sidebar
+  
+  # Registry & File Associations (optional)
+  # include: "build/installer.nsh"             # Custom NSIS script (uncomment if you create one)
+  selectPerMachineByDefault: false             # Default to per-user install
+  packElevateHelper: true                      # Pack UAC elevation helper
+
+# Portable App Configuration (Windows)
+# ============================================================================
+# portable:
+#   artifactName: "${productName}-${version}-portable.exe"
+
+# ============================================================================
+# MACOS CONFIGURATION (Commented out - only building for Windows/Linux)
+# ============================================================================
+# mac:
+#   target:
+#     - target: "dmg"
+#       arch:
+#         - "x64"
+#         - "arm64"
+#   icon: "build/icon.icns"                      # macOS icon (512x512 minimum)
+#   artifactName: "${productName}-${version}-mac-${arch}.${ext}"
+#   category: "public.app-category.utilities"    # App Store category
+#   hardenedRuntime: true                        # Required for notarization
+#   gatekeeperAssess: false                      # Don't check Gatekeeper during build
+#   entitlements: "build/entitlements.mac.plist" # Entitlements file
+#   entitlementsInherit: "build/entitlements.mac.plist"
+#   provisioningProfile: null                    # Provisioning profile (if needed)
+#   type: "distribution"                         # Distribution type
+#   minimumSystemVersion: "10.15.0"              # Minimum macOS version (Catalina)
+#   darkModeSupport: true                        # Support for dark mode
+  
+  # Code Signing & Notarization (REQUIRED for production on macOS)
+  # Get Apple Developer ID certificate: https://developer.apple.com/account
+  # identity: "Developer ID Application: Your Name (TEAMID)" # Signing identity
+  # OR let it auto-detect:
+  # identity: null                             # Auto-detect signing identity
+  
+  # Notarization (required for macOS 10.15+)
+  # After building, notarize with:
+  # xcrun notarytool submit app.dmg --keychain-profile "AC_PASSWORD" --wait
+  # OR set environment variables:
+  # APPLE_ID: Your Apple ID email
+  # APPLE_APP_SPECIFIC_PASSWORD: App-specific password
+  # APPLE_TEAM_ID: Your Team ID
+  
+  # File Associations (optional)
+  # extendInfo:
+  #   CFBundleDocumentTypes:
+  #     - CFBundleTypeName: "World Clock File"
+  #       CFBundleTypeRole: "Editor"
+  #       CFBundleTypeExtensions:
+  #         - "worldclock"
+  #       CFBundleTypeIconFile: "icon.icns"
+
+# DMG Configuration (macOS) - Commented out
+# ============================================================================
+# dmg:
+#   background: "build/dmg-background.png"       # DMG background (540x380 recommended)
+#   icon: "build/icon.icns"                      # Volume icon
+#   iconSize: 100                                # Icon size in DMG
+#   contents:                                    # DMG window layout
+#     - x: 130
+#       y: 220
+#     - x: 410
+#       y: 220
+#       type: "link"
+#       path: "/Applications"
+#   window:
+#     width: 540
+#     height: 380
+#   format: "UDZO"                               # Compressed DMG
+#   artifactName: "${productName}-${version}-mac-${arch}.${ext}"
+
+# PKG Configuration (macOS) - Commented out
+# ============================================================================
+# pkg:
+#   installLocation: "/Applications"             # Install location
+#   allowAnywhere: true                          # Allow install anywhere
+#   allowCurrentUserHome: true                   # Allow install in user home
+#   allowRootDirectory: false                    # Don't allow install in root
+#   identity: null                               # Signing identity (auto-detect)
+#   scripts: "build/pkg-scripts"                 # Custom scripts (optional)
+
+# ============================================================================
+# LINUX CONFIGURATION
+# ============================================================================
 linux:
   target:
-    - target: "AppImage"
+#    - target: "AppImage"                       # Universal Linux package
+#      arch:
+#        - "x64"
+#        - "arm64"
+    - target: "deb"                            # Debian/Ubuntu
       arch:
         - "x64"
-    - target: "deb"
+        - "arm64"
+    - target: "rpm"                            # RedHat/Fedora/SUSE
       arch:
         - "x64"
-    - target: "tar.gz"
+        - "arm64"
+    - target: "snap"                           # Snap package
       arch:
         - "x64"
+    - target: "tar.gz"                         # Compressed archive
+      arch:
+        - "x64"
+        - "arm64"
+  icon: "build/icon.png"                       # Linux icon (512x512 PNG)
   artifactName: "${name}-${version}-linux-${arch}.${ext}"
-  category: "Utility"
-mac:
-  target:
-    - target: "dmg"
-      arch:
-        - "x64"
-        - "arm64"
-    - target: "zip"
-      arch:
-        - "x64"
-        - "arm64"
-  artifactName: "${productName}-${version}-mac-${arch}.${ext}"
-  category: "public.app-category.utilities"
+  category: "Utility"                          # Desktop entry category
+  synopsis: "World Clock Desktop Application"  # Short description
+  description: "Desktop application for displaying world clocks across different timezones with beautiful analog clocks and real-time updates."
+  desktop:                                     # Desktop entry customization
+    entry:                                     # Desktop file entries
+      Name: "World Clock"
+      Type: "Application"
+      Comment: "Track time across multiple timezones"
+      Terminal: false
+      StartupWMClass: "World Clock"
+      Categories: "Utility;Clock;"
+      MimeType: ""
+      Icon: "world.clock"
+  executableName: "world-clock"                # Binary name
+  vendor: "World Clock"                        # Vendor name
+  maintainer: "World Clock <contact@yoursite.com>" # Maintainer info
+
+# AppImage Configuration (Linux) - Commented out since AppImage is disabled
+# ============================================================================
+# appImage:
+#   license: "LICENSE"                           # License file
+#   artifactName: "${productName}-${version}-linux-${arch}.${ext}"
+#   desktop:
+#     StartupWMClass: "World Clock"
+
+# DEB Configuration (Debian/Ubuntu)
+# ============================================================================
+deb:
+  depends:                                     # Package dependencies
+    - "gconf2"
+    - "gconf-service"
+    - "libnotify4"
+    - "libappindicator1"
+    - "libxtst6"
+    - "libnss3"
+  priority: "optional"
+  compression: "xz"                            # Compression method
+  afterInstall: "build/deb-postinstall.sh"    # Post-install script (optional)
+  afterRemove: "build/deb-postremove.sh"      # Post-remove script (optional)
+
+# RPM Configuration (RedHat/Fedora)
+# ============================================================================
+rpm:
+  depends:                                     # Package dependencies
+    - "libXScrnSaver"
+    - "libappindicator"
+    - "libnotify"
+  compression: "xz"                            # Compression method
+  afterInstall: "build/rpm-postinstall.sh"    # Post-install script (optional)
+  afterRemove: "build/rpm-postremove.sh"      # Post-remove script (optional)
+
+# Snap Configuration (Linux)
+# ============================================================================
+snap:
+  grade: "stable"                              # stable or devel
+  confinement: "strict"                        # strict, classic, or devmode
+  summary: "World Clock Desktop Application"   # Short description
+  base: "core22"                               # Base snap
+  plugs:                                       # Permissions
+    - "default"
+    - "network"
+    - "network-bind"
+    - "desktop"
+    - "desktop-legacy"
+    - "x11"
+    - "unity7"
+    - "browser-support"
+    - "pulseaudio"
+    - "opengl"
+
+# ============================================================================
+# AUTO-UPDATE CONFIGURATION
+# ============================================================================
+# Uncomment and configure when ready to enable auto-updates
+
+# publish:
+#   provider: "github"                         # GitHub Releases
+#   owner: "your-github-username"              # GitHub username/org
+#   repo: "world.clock"                        # Repository name
+#   releaseType: "release"                     # release or prerelease
+#   publishAutoUpdate: true                    # Auto-publish updates
+#   token: "${env.GH_TOKEN}"                   # GitHub token from env var
+
+# OR use generic provider:
+# publish:
+#   provider: "generic"                        # Generic provider
+#   url: "https://your-domain.com/releases/"   # Base URL
+#   channel: "latest"                          # Update channel
+
+# OR use S3:
+# publish:
+#   provider: "s3"
+#   bucket: "your-bucket"
+#   region: "us-east-1"
+#   path: "/releases"
+
+# ============================================================================
+# ADVANCED BUILD OPTIONS
+# ============================================================================
+
+# Build for all platforms from one OS (experimental)
+# ============================================================================
+# electronDownload:
+#   mirror: "https://npmmirror.com/mirrors/electron/" # Mirror for faster downloads in some regions
+
+# Custom Electron version (use when needed)
+# ============================================================================
+# electronVersion: "39.0.0"                    # Lock Electron version
+
+# Parallel builds
+# ============================================================================
+# artifactBuildStarted: true                   # Emit artifact build started event
+# artifactBuildCompleted: true                 # Emit artifact build completed event
+
+# Node.js & npm configuration
+# ============================================================================
+nodeGypRebuild: false                          # Don't rebuild native modules (electron-builder handles it)
+npmRebuild: true                               # Rebuild native modules
+buildDependenciesFromSource: false             # Use prebuilt binaries when possible
+
+# Protocol Handlers (optional)
+# ============================================================================
+# protocols:
+#   name: "World Clock"
+#   schemes:
+#     - "worldclock"                           # Custom URL scheme: worldclock://
+
+# Windows App Store (optional)
+# ============================================================================
+# appx:
+#   applicationId: "WorldClock"
+#   displayName: "World Clock"
+#   publisherDisplayName: "Your Company"
+#   identityName: "12345YourCompany.WorldClock"
+#   publisher: "CN=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+
+# Mac App Store (optional)
+# ============================================================================
+# mas:
+#   type: "distribution"
+#   category: "public.app-category.utilities"
+#   entitlements: "build/entitlements.mas.plist"
+#   entitlementsInherit: "build/entitlements.mas.inherit.plist"
+#   provisioningProfile: "build/embedded.provisionprofile"
+#   binaries: []
+
+# ============================================================================
+# NOTES FOR PRODUCTION DEPLOYMENT
+# ============================================================================
+#
+# 1. ICONS: Create and add icons to build/ directory
+#    - Windows: icon.ico (256x256 or multi-size)
+#    - macOS: icon.icns (512x512 base)
+#    - Linux: icon.png (512x512)
+#
+# 2. CODE SIGNING:
+#    Windows: Get Authenticode certificate (~$100-$400/year)
+#    macOS: Get Apple Developer account ($99/year) + certificates
+#    Linux: No signing required
+#
+# 3. NOTARIZATION (macOS 10.15+):
+#    Required for distribution outside Mac App Store
+#    Run: xcrun notarytool submit --help
+#
+# 4. AUTO-UPDATES:
+#    Configure publish section above
+#    Add electron-updater to dependencies
+#    Implement update checking in main process
+#
+# 5. SECURITY:
+#    - Never commit certificates or passwords
+#    - Use environment variables for secrets
+#    - Enable CSP in renderer process
+#    - Keep Electron updated
+#
+# 6. TESTING:
+#    - Test installers on clean VMs
+#    - Test update flow
+#    - Test on minimum OS versions
+#    - Test all installation options
+#
+# 7. OPTIMIZATION:
+#    - Minimize bundle size
+#    - Use asar archive
+#    - Exclude dev dependencies
+#    - Test startup performance
+#
+# ============================================================================

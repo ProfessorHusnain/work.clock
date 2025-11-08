@@ -19,9 +19,44 @@
 
 # production
 /dist
+/dist-release
 
 # build resources (keep the directory, ignore specific files if needed)
 # /build - Don't ignore, it contains installer resources
+
+# Electron builder output
+*.exe
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.snap
+*.AppImage
+*.tar.gz
+*.zip
+*.blockmap
+latest*.yml
+alpha*.yml
+beta*.yml
+
+# Code signing certificates (NEVER COMMIT THESE!)
+*.pfx
+*.p12
+*.cer
+*.crt
+*.key
+*.keychain
+build/certificate.*
+build/*.pfx
+build/*.p12
+
+# macOS code signing
+*.provisionprofile
+embedded.provisionprofile
+
+# Build resources that may contain sensitive info
+build/installer.nsh
+build/*-scripts/
 
 # misc
 .DS_Store
@@ -42,3 +77,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# compiled output
+.swc/

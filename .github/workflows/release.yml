@@ -1,0 +1,392 @@
+name: Build and Release
+
+on:
+  # Allow manual workflow dispatch with options
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release Type'
+        required: true
+        type: choice
+        options:
+          - draft
+          - prerelease
+          - release
+        default: 'draft'
+      platforms:
+        description: 'Platforms to build (comma-separated: windows,linux)'
+        required: false
+        default: 'windows,linux'
+
+# Ensure only one workflow runs at a time per branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================================
+  # JOB 1: Build Information & Validation
+  # ============================================================================
+  build-info:
+    name: 📋 Build Information
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.package.outputs.version }}
+      should_release: ${{ steps.check.outputs.should_release }}
+      is_tag: ${{ steps.check.outputs.is_tag }}
+      platforms: ${{ steps.platforms.outputs.platforms }}
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Extract package version
+        id: package
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Package Version: **$VERSION**" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🔍 Check release conditions
+        id: check
+        run: |
+          IS_TAG=${{ startsWith(github.ref, 'refs/tags/v') }}
+          SHOULD_RELEASE=${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v') }}
+          
+          echo "is_tag=$IS_TAG" >> $GITHUB_OUTPUT
+          echo "should_release=$SHOULD_RELEASE" >> $GITHUB_OUTPUT
+          
+          echo "## 🔍 Build Conditions" >> $GITHUB_STEP_SUMMARY
+          echo "- **Event**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch/Tag**: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Is Tag**: $IS_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "- **Should Release**: $SHOULD_RELEASE" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🎯 Determine platforms
+        id: platforms
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            PLATFORMS="${{ github.event.inputs.platforms }}"
+          else
+            PLATFORMS="windows,linux"
+          fi
+          echo "platforms=$PLATFORMS" >> $GITHUB_OUTPUT
+          echo "- **Platforms**: $PLATFORMS" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================================================
+  # JOB 2: Build for Windows
+  # ============================================================================
+  build-windows:
+    name: 🪟 Build Windows
+    runs-on: windows-latest
+    needs: build-info
+    if: contains(needs.build-info.outputs.platforms, 'windows')
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔨 Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: 📦 Package for Windows
+        run: npm run dist:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📊 List artifacts
+        shell: pwsh
+        run: |
+          Write-Output "## 🪟 Windows Build Artifacts" >> $env:GITHUB_STEP_SUMMARY
+          Write-Output "" >> $env:GITHUB_STEP_SUMMARY
+          Write-Output "```" >> $env:GITHUB_STEP_SUMMARY
+          Get-ChildItem -Path dist-release -Recurse -File | 
+            Where-Object { $_.Extension -in @('.exe', '.blockmap', '.yml') } | 
+            ForEach-Object {
+              $size = "{0:N2} MB" -f ($_.Length / 1MB)
+              Write-Output "$($_.Name) - $size" >> $env:GITHUB_STEP_SUMMARY
+            }
+          Write-Output "```" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: 📤 Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: |
+            dist-release/*.exe
+            dist-release/*.blockmap
+            dist-release/*.yml
+          retention-days: 30
+          if-no-files-found: error
+
+  # ============================================================================
+  # JOB 3: Build for Linux
+  # ============================================================================
+  build-linux:
+    name: 🐧 Build Linux
+    runs-on: ubuntu-latest
+    needs: build-info
+    if: contains(needs.build-info.outputs.platforms, 'linux')
+    
+    strategy:
+      matrix:
+        arch: [x64, arm64]
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔨 Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: 🔧 Install additional dependencies for ${{ matrix.arch }}
+        run: |
+          sudo apt-get update
+          if [ "${{ matrix.arch }}" == "arm64" ]; then
+            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          fi
+
+      - name: 📦 Package for Linux (${{ matrix.arch }})
+        run: npm run dist:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📊 List artifacts
+        run: |
+          echo "## 🐧 Linux Build Artifacts (${{ matrix.arch }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          find dist-release -type f \( -name "*.deb" -o -name "*.rpm" -o -name "*.snap" -o -name "*.tar.gz" -o -name "*.yml" \) -exec ls -lh {} \; | awk '{print $9, "-", $5}' >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: 📤 Upload Linux artifacts (${{ matrix.arch }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build-${{ matrix.arch }}
+          path: |
+            dist-release/*.deb
+            dist-release/*.rpm
+            dist-release/*.snap
+            dist-release/*.tar.gz
+            dist-release/*.yml
+          retention-days: 30
+          if-no-files-found: error
+
+  # ============================================================================
+  # JOB 4: Create Release Summary
+  # ============================================================================
+  release-summary:
+    name: 📊 Release Summary
+    runs-on: ubuntu-latest
+    needs: [build-info, build-windows, build-linux]
+    if: always()
+    
+    steps:
+      - name: 📥 Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: 📊 Generate comprehensive summary
+        run: |
+          echo "# 🎉 World Clock - Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: ${{ needs.build-info.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 📦 Build Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Windows artifacts
+          if [ -d "artifacts/windows-build" ]; then
+            echo "### 🪟 Windows" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            find artifacts/windows-build -type f -exec ls -lh {} \; | awk '{printf "%-60s %10s\n", $9, $5}' >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Linux artifacts
+          if [ -d "artifacts" ]; then
+            for arch_dir in artifacts/linux-build-*; do
+              if [ -d "$arch_dir" ]; then
+                ARCH=$(basename "$arch_dir" | sed 's/linux-build-//')
+                echo "### 🐧 Linux ($ARCH)" >> $GITHUB_STEP_SUMMARY
+                echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+                find "$arch_dir" -type f -exec ls -lh {} \; | awk '{printf "%-60s %10s\n", $9, $5}' >> $GITHUB_STEP_SUMMARY
+                echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+              fi
+            done
+          fi
+          
+          echo "## ✅ Build Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Windows x64 | ${{ needs.build-windows.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Linux x64 | ${{ needs.build-linux.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Linux ARM64 | ${{ needs.build-linux.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================================================
+  # JOB 5: Create GitHub Release
+  # ============================================================================
+  create-release:
+    name: 🚀 Create Release
+    runs-on: ubuntu-latest
+    needs: [build-info, build-windows, build-linux]
+    if: needs.build-info.outputs.should_release == 'true'
+    permissions:
+      contents: write
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📥 Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: 📝 Generate release notes
+        id: release_notes
+        run: |
+          VERSION="${{ needs.build-info.outputs.version }}"
+          
+          cat > release_notes.md << 'EOF'
+          ## 🎉 World Clock v${{ needs.build-info.outputs.version }}
+          
+          ### 📦 Installation
+          
+          #### 🪟 Windows
+          - Download `World Clock-${{ needs.build-info.outputs.version }}-windows-x64.exe`
+          - Run the installer and follow the installation wizard
+          - The application will launch automatically after installation
+          
+          #### 🐧 Linux
+          
+          **Debian/Ubuntu (x64/ARM64)**
+          ```bash
+          sudo dpkg -i world.clock-${{ needs.build-info.outputs.version }}-linux-x64.deb
+          # or
+          sudo dpkg -i world.clock-${{ needs.build-info.outputs.version }}-linux-arm64.deb
+          ```
+          
+          **RedHat/Fedora/SUSE (x64/ARM64)**
+          ```bash
+          sudo rpm -i world.clock-${{ needs.build-info.outputs.version }}-linux-x64.rpm
+          # or
+          sudo rpm -i world.clock-${{ needs.build-info.outputs.version }}-linux-arm64.rpm
+          ```
+          
+          **Snap**
+          ```bash
+          sudo snap install world.clock-${{ needs.build-info.outputs.version }}-linux-x64.snap --dangerous
+          ```
+          
+          **Universal (tar.gz)**
+          ```bash
+          tar -xzf world.clock-${{ needs.build-info.outputs.version }}-linux-x64.tar.gz
+          cd world.clock-${{ needs.build-info.outputs.version }}
+          ./world-clock
+          ```
+          
+          ### 📋 Changes
+          
+          - Professional desktop application for tracking time across multiple timezones
+          - Beautiful analog clocks with real-time updates
+          - Multiple clock skins and customization options
+          - Drag-and-drop timezone reordering
+          - Import/Export timezone configurations
+          - Keyboard shortcuts for quick access
+          - Cross-platform support (Windows, Linux)
+          
+          ### 🔧 System Requirements
+          
+          - **Windows**: Windows 10 or later (64-bit)
+          - **Linux**: 
+            - Debian 10+ / Ubuntu 18.04+ (x64/ARM64)
+            - Fedora 32+ / RHEL 8+ (x64/ARM64)
+            - Other distributions via Snap or tar.gz
+          
+          ### 📝 Notes
+          
+          - First-time installation may require administrator/sudo privileges
+          - On Windows, you may see a SmartScreen warning (app is not code-signed yet)
+          - On Linux, ensure required dependencies are installed (see documentation)
+          
+          ### 🐛 Known Issues
+          
+          - None reported in this release
+          
+          ### 📚 Documentation
+          
+          For more information, visit the [GitHub repository](https://github.com/${{ github.repository }})
+          
+          ---
+          
+          **Build Information**
+          - Commit: `${{ github.sha }}`
+          - Build Date: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+          - Node.js: 20.x
+          - Electron: 39.x
+          EOF
+          
+          echo "Release notes generated"
+
+      - name: 🚀 Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.build-info.outputs.is_tag == 'true' && github.ref_name || format('v{0}', needs.build-info.outputs.version) }}
+          name: ${{ format('World Clock v{0}', needs.build-info.outputs.version) }}
+          body_path: release_notes.md
+          draft: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_type == 'draft' }}
+          prerelease: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_type == 'prerelease' }}
+          files: |
+            artifacts/windows-build/*
+            artifacts/linux-build-x64/*
+            artifacts/linux-build-arm64/*
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📊 Release summary
+        run: |
+          echo "## 🚀 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: v${{ needs.build-info.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Release URL**: https://github.com/${{ github.repository }}/releases/tag/${{ needs.build-info.outputs.is_tag == 'true' && github.ref_name || format('v{0}', needs.build-info.outputs.version) }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Released Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The following files have been uploaded to the release:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          find artifacts -type f \( -name "*.exe" -o -name "*.deb" -o -name "*.rpm" -o -name "*.snap" -o -name "*.tar.gz" \) | while read file; do
+            echo "- \`$(basename "$file")\`" >> $GITHUB_STEP_SUMMARY
+          done
+

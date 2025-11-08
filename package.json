@@ -1,10 +1,29 @@
 {
   "name": "world.clock",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "Electron + Next.js desktop app for World Clock",
-  "author": "Your Name",
+  "description": "Professional desktop application for tracking time across multiple timezones with beautiful analog clocks and real-time updates",
+  "author": "Your Name <your.email@example.com>",
+  "homepage": "https://github.com/your-username/world.clock#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/world.clock.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/world.clock/issues"
+  },
+  "keywords": [
+    "electron",
+    "nextjs",
+    "world-clock",
+    "timezone",
+    "time",
+    "clock",
+    "desktop",
+    "cross-platform"
+  ],
   "main": "dist/electron/main.js",
+  "license": "MIT",
   "scripts": {
     "dev": "npm run build:electron && concurrently -n \"TSC,NEXT,ELECTRON\" -c \"cyan,yellow,blue\" --kill-others \"tsc -p tsconfig.electron.json --watch\" \"next dev\" \"wait-on http://localhost:3000 && electron .\"",
     "prebuild": "rimraf dist out .next",

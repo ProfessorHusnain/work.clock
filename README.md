@@ -124,25 +124,50 @@ world.clock/
 
 ### Electron Builder
 
-The app is configured to build for:
-- **Windows**: NSIS installer (interactive), portable, and zip
-- **macOS**: DMG and zip (x64 and Apple Silicon)
-- **Linux**: AppImage, deb, and tar.gz
+The app is configured to build production-ready installers for all platforms:
+
+- **Windows**: NSIS installer (x64, ARM64), portable executable, zip archive
+- **macOS**: DMG, PKG, and zip (Intel x64 and Apple Silicon ARM64)
+- **Linux**: AppImage, DEB, RPM, Snap, and tar.gz (x64, ARM64)
 
 Configuration is in `electron-builder.yaml`.
 
-#### Windows Installer Features
+### Production Deployment
 
-The NSIS installer provides users with installation choices:
-- ✅ Choose installation location
-- ✅ Choose per-user or per-machine installation
-- ✅ Creates desktop shortcut (can be removed manually)
-- ✅ Always creates Start Menu shortcut
-- ✅ Option to launch app after installation
-- ✅ Multi-language support
-- ✅ Shows license agreement
+**📦 Ready to deploy?** 
 
-See `INSTALLER-GUIDE.md` for detailed configuration options.
+→ **Start here: [PRODUCTION_DOCS_INDEX.md](PRODUCTION_DOCS_INDEX.md)** - Complete navigation guide
+
+**Quick Links:**
+- **[QUICK_PRODUCTION_GUIDE.md](QUICK_PRODUCTION_GUIDE.md)** - 5-minute quick start
+- **[PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md)** - Complete deployment guide
+- **[PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md)** - Pre-release checklist
+- **[ICON_CREATION_GUIDE.md](ICON_CREATION_GUIDE.md)** - Icon creation guide
+- **[PRODUCTION_QUICK_REFERENCE.md](PRODUCTION_QUICK_REFERENCE.md)** - Command cheat sheet
+- **[build/README.md](build/README.md)** - Build resources reference
+
+#### Key Features
+
+**Windows Installer:**
+- Multi-language support (10+ languages)
+- User-selectable install location
+- Per-user or per-machine installation
+- Desktop and Start Menu shortcuts
+- Clean uninstallation with data removal
+- Code signing ready
+
+**macOS Installer:**
+- Universal binaries (Intel + Apple Silicon)
+- Beautiful DMG with custom background
+- Notarization support
+- Hardened runtime enabled
+- Dark mode support
+
+**Linux Packages:**
+- Multiple formats (AppImage, DEB, RPM, Snap)
+- Desktop integration
+- System tray support
+- Proper dependency management
 
 ### TypeScript
 
