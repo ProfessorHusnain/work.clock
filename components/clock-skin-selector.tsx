@@ -21,98 +21,95 @@ interface ClockSkinSelectorProps {
 
 export function ClockSkinSelector({ value, onValueChange }: ClockSkinSelectorProps) {
   return (
-    <div className="space-y-3">
-      <Label htmlFor="clock-skin-selector">Clock Style</Label>
-      <ToggleGroup
-        id="clock-skin-selector"
-        type="single"
-        value={value}
-        onValueChange={(newValue) => {
-          if (newValue) onValueChange(newValue as ClockSkin);
-        }}
-        className="flex flex-wrap justify-start gap-2"
-      >
+    <ToggleGroup
+      id="clock-skin-selector"
+      type="single"
+      value={value}
+      onValueChange={(newValue) => {
+        if (newValue) onValueChange(newValue as ClockSkin);
+      }}
+      className="grid grid-cols-4 gap-2"
+    >
         <ToggleGroupItem
           value="classic"
           aria-label="Classic clock style"
-          className="flex flex-col items-center gap-1 px-4 py-3 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white"
+          className="flex flex-col items-center gap-2 px-3 py-4 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           title="Classic - Traditional analog clock with numbers"
         >
-          <CircleDot className="h-5 w-5" />
+          <CircleDot className="h-6 w-6" />
           <span className="text-xs font-medium">Classic</span>
         </ToggleGroupItem>
 
         <ToggleGroupItem
           value="minimal"
           aria-label="Minimal clock style"
-          className="flex flex-col items-center gap-1 px-4 py-3 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white"
+          className="flex flex-col items-center gap-2 px-3 py-4 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           title="Minimal - Clean design with thin hands"
         >
-          <Minus className="h-5 w-5" />
+          <Minus className="h-6 w-6" />
           <span className="text-xs font-medium">Minimal</span>
         </ToggleGroupItem>
 
         <ToggleGroupItem
           value="swiss"
           aria-label="Swiss Railway clock style"
-          className="flex flex-col items-center gap-1 px-4 py-3 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white"
+          className="flex flex-col items-center gap-2 px-3 py-4 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           title="Swiss Railway - Iconic design with red second hand"
         >
-          <Circle className="h-5 w-5" />
+          <Circle className="h-6 w-6" />
           <span className="text-xs font-medium">Swiss</span>
         </ToggleGroupItem>
 
         <ToggleGroupItem
           value="artdeco"
           aria-label="Art Deco clock style"
-          className="flex flex-col items-center gap-1 px-4 py-3 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white"
+          className="flex flex-col items-center gap-2 px-3 py-4 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           title="Art Deco - Geometric design with gold accents"
         >
-          <Square className="h-5 w-5" />
+          <Square className="h-6 w-6" />
           <span className="text-xs font-medium">Art Deco</span>
         </ToggleGroupItem>
 
         <ToggleGroupItem
           value="neon"
           aria-label="Neon/Cyberpunk clock style"
-          className="flex flex-col items-center gap-1 px-4 py-3 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white"
+          className="flex flex-col items-center gap-2 px-3 py-4 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           title="Neon - Glowing cyberpunk style"
         >
-          <Sparkles className="h-5 w-5" />
+          <Sparkles className="h-6 w-6" />
           <span className="text-xs font-medium">Neon</span>
         </ToggleGroupItem>
 
         <ToggleGroupItem
           value="wooden"
           aria-label="Wooden clock style"
-          className="flex flex-col items-center gap-1 px-4 py-3 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white"
+          className="flex flex-col items-center gap-2 px-3 py-4 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           title="Wooden - Vintage wood texture"
         >
-          <TreePine className="h-5 w-5" />
+          <TreePine className="h-6 w-6" />
           <span className="text-xs font-medium">Wooden</span>
         </ToggleGroupItem>
 
         <ToggleGroupItem
           value="glass"
           aria-label="Glass Morphism clock style"
-          className="flex flex-col items-center gap-1 px-4 py-3 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white"
+          className="flex flex-col items-center gap-2 px-3 py-4 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           title="Glass - Frosted glass effect"
         >
-          <Droplet className="h-5 w-5" />
+          <Droplet className="h-6 w-6" />
           <span className="text-xs font-medium">Glass</span>
         </ToggleGroupItem>
 
         <ToggleGroupItem
           value="neomorphic"
           aria-label="Neomorphic clock style"
-          className="flex flex-col items-center gap-1 px-4 py-3 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white"
+          className="flex flex-col items-center gap-2 px-3 py-4 h-auto data-[state=on]:bg-blue-500 data-[state=on]:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           title="Neomorphic - Soft 3D shadows"
         >
-          <Layers className="h-5 w-5" />
+          <Layers className="h-6 w-6" />
           <span className="text-xs font-medium">Neomorphic</span>
         </ToggleGroupItem>
       </ToggleGroup>
-    </div>
   );
 }
 

@@ -11,6 +11,8 @@ interface TimezoneContextValue {
   selectedTimezones: TimeZoneInfo[];
   
   // User preferences
+  userPreferences: UserPreferences | null;
+  savePreferences: (prefs: UserPreferences) => Promise<void>;
   clockSize: ClockSize;
   setClockSize: (size: ClockSize) => void;
   clockSkin: ClockSkin;
@@ -22,6 +24,7 @@ interface TimezoneContextValue {
   reorderTimezones: (timezoneIds: string[]) => Promise<void>;
   searchTimezones: (query: string) => TimeZoneInfo[];
   downloadMoreTimezones: () => Promise<number>; // Returns count of new timezones
+  refreshTimezones: () => Promise<void>;
   
   // State
   isLoading: boolean;
@@ -187,9 +190,33 @@ export function TimezoneProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refreshTimezones = async (): Promise<void> => {
+    try {
+      // Reload user preferences and timezones from storage
+      const prefs = await storageService.loadUserPreferences();
+      setUserPreferences(prefs);
+      
+      const timezones = await storageService.loadTimezoneData();
+      setAvailableTimezones(timezones);
+      
+      // Reconstruct selected timezones from preferences
+      if (prefs) {
+        const selected = prefs.selected_timezones
+          .map((pref) => timezones.find((tz) => tz.id === pref.timezone_id))
+          .filter(Boolean) as TimeZoneInfo[];
+        setSelectedTimezones(selected);
+      }
+    } catch (error) {
+      console.error("Error refreshing timezones:", error);
+      throw error;
+    }
+  };
+
   const value: TimezoneContextValue = {
     availableTimezones,
     selectedTimezones,
+    userPreferences,
+    savePreferences,
     clockSize: userPreferences?.clock_size || "large",
     setClockSize,
     clockSkin: userPreferences?.clock_skin || "classic",
@@ -199,6 +226,7 @@ export function TimezoneProvider({ children }: { children: ReactNode }) {
     reorderTimezones,
     searchTimezones,
     downloadMoreTimezones,
+    refreshTimezones,
     isLoading,
     error,
   };

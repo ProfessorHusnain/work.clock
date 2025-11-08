@@ -1,11 +1,12 @@
 "use client";
 
 import { AnalogClock } from "@/components/analog-clock";
-import { ClockSizeSelector, getClockSizeInPixels } from "@/components/clock-size-selector";
-import { ClockSkinSelector } from "@/components/clock-skin-selector";
+import { getClockSizeInPixels } from "@/components/clock-size-selector";
+import { ClockGridSkeleton } from "@/components/clock-skeleton";
+import { ImportDialog } from "@/components/import-export-dialogs";
 import { TimezoneSelector } from "@/components/timezone-selector";
 import { useTimezones } from "@/lib/hooks/useTimezones";
-import { Trash2, Loader2, GripVertical } from "lucide-react";
+import { Trash2, GripVertical, Clock, Upload, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DndContext,
@@ -42,6 +43,8 @@ export default function Home() {
   } = useTimezones();
 
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showTimezoneSelector, setShowTimezoneSelector] = useState(false);
   const sizeInPixels = getClockSizeInPixels(clockSize);
 
   // Configure sensors with MouseSensor as primary (better for Electron)
@@ -109,11 +112,11 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-gray-900 dark:to-black flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading world clocks...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-gray-900 dark:to-black pt-20 px-8 pb-12">
+        <main className="container mx-auto max-w-7xl py-12">
+           {/* Clock grid skeleton */}
+          <ClockGridSkeleton count={6} size={clockSize} />
+        </main>
       </div>
     );
   }
@@ -130,43 +133,54 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-gray-900 dark:to-black pt-24 px-8 pb-12">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-gray-900 dark:to-black pt-20 px-8 pb-12">
       <main className="container mx-auto max-w-7xl py-12">
-        {/* Welcome Section */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            World Clock
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-            Track time across different timezones around the world
-          </p>
-
-          {/* Controls */}
-          <div className="flex flex-col md:flex-row justify-center items-center gap-6 mb-12">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-              <ClockSizeSelector
-                value={clockSize}
-                onValueChange={setClockSize}
-              />
-            </div>
-            
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-              <ClockSkinSelector
-                value={clockSkin}
-                onValueChange={setClockSkin}
-              />
-            </div>
-            
-            <TimezoneSelector />
-          </div>
-        </div>
-
         {/* Clocks Grid */}
         {selectedTimezones.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-gray-600 dark:text-gray-400 text-lg mb-6">
-              No timezones selected. Click "Add Timezone" to get started!
+          <div className="flex flex-col items-center justify-center py-20 px-6">
+            {/* Empty State Icon */}
+            <div className="flex items-center justify-center h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-2xl mb-6">
+              <Clock className="h-12 w-12 text-white" />
+            </div>
+            
+            {/* Empty State Text */}
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+              No Timezones Yet
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-md text-center">
+              Get started by adding your first timezone or import your preferences from a file
             </p>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button 
+                onClick={() => setShowTimezoneSelector(true)}
+                size="lg"
+                className="gap-2"
+              >
+                <Plus className="h-5 w-5" />
+                Add Timezone
+              </Button>
+              <Button 
+                onClick={() => setShowImportDialog(true)}
+                variant="outline" 
+                size="lg"
+                className="gap-2"
+              >
+                <Upload className="h-5 w-5" />
+                Import Preferences
+              </Button>
+            </div>
+            
+            {/* Dialogs */}
+            <TimezoneSelector 
+              open={showTimezoneSelector} 
+              onOpenChange={setShowTimezoneSelector} 
+            />
+            <ImportDialog 
+              open={showImportDialog} 
+              onOpenChange={setShowImportDialog} 
+            />
           </div>
         ) : (
           <DndContext

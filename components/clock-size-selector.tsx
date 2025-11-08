@@ -16,36 +16,39 @@ export function ClockSizeSelector({
   onValueChange,
 }: ClockSizeSelectorProps) {
   return (
-    <div className="flex flex-col items-center gap-3">
-      <Label className="text-base font-semibold text-gray-900 dark:text-gray-100">
-        Clock Size
-      </Label>
-      <ToggleGroup
-        type="single"
-        value={value}
-        onValueChange={(val) => {
-          if (val) onValueChange(val as ClockSize);
-        }}
-        className="bg-gray-200 dark:bg-gray-700"
+    <ToggleGroup
+      type="single"
+      value={value}
+      onValueChange={(val) => {
+        if (val) onValueChange(val as ClockSize);
+      }}
+      className="bg-gray-100 dark:bg-gray-800 rounded-lg p-1"
+    >
+      <ToggleGroupItem
+        value="extra-small"
+        aria-label="Extra Small"
+        className="gap-2 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-700"
       >
-        <ToggleGroupItem
-          value="extra-small"
-          aria-label="Extra Small"
-          className="gap-2"
-        >
-          <Circle className="h-3 w-3" />
-          <span>Extra Small</span>
-        </ToggleGroupItem>
-        <ToggleGroupItem value="small" aria-label="Small" className="gap-2">
-          <Minimize2 className="h-4 w-4" />
-          <span>Small</span>
-        </ToggleGroupItem>
-        <ToggleGroupItem value="large" aria-label="Large" className="gap-2">
-          <Maximize2 className="h-4 w-4" />
-          <span>Large</span>
-        </ToggleGroupItem>
-      </ToggleGroup>
-    </div>
+        <Circle className="h-3 w-3" />
+        <span>Extra Small</span>
+      </ToggleGroupItem>
+      <ToggleGroupItem 
+        value="small" 
+        aria-label="Small" 
+        className="gap-2 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-700"
+      >
+        <Minimize2 className="h-4 w-4" />
+        <span>Small</span>
+      </ToggleGroupItem>
+      <ToggleGroupItem 
+        value="large" 
+        aria-label="Large" 
+        className="gap-2 data-[state=on]:bg-white dark:data-[state=on]:bg-gray-700"
+      >
+        <Maximize2 className="h-4 w-4" />
+        <span>Large</span>
+      </ToggleGroupItem>
+    </ToggleGroup>
   );
 }
 
