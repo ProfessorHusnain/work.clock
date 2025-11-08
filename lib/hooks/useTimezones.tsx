@@ -193,10 +193,10 @@ export function TimezoneProvider({ children }: { children: ReactNode }) {
   const refreshTimezones = async (): Promise<void> => {
     try {
       // Reload user preferences and timezones from storage
-      const prefs = await storageService.loadUserPreferences();
+      const prefs = await storageService.getUserPreferences();
       setUserPreferences(prefs);
       
-      const timezones = await storageService.loadTimezoneData();
+      const timezones = await storageService.getTimezoneData();
       setAvailableTimezones(timezones);
       
       // Reconstruct selected timezones from preferences

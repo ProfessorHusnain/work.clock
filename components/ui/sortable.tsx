@@ -452,10 +452,10 @@ export function SortableItem({
             dragHandlePositionClasses
           )}
           style={{
-            WebkitUserDrag: 'element' as any,
-            WebkitUserSelect: 'none' as any,
+            WebkitUserDrag: 'element',
+            WebkitUserSelect: 'none',
             touchAction: 'none',
-          }}
+          } as React.CSSProperties}
         >
           {dragHandle}
         </div>
@@ -469,10 +469,10 @@ export function SortableItem({
           data-sortable-handle="true"
           className="cursor-grab active:cursor-grabbing select-none"
           style={{
-            WebkitUserDrag: 'element' as any,
-            WebkitUserSelect: 'none' as any,
+            WebkitUserDrag: 'element',
+            WebkitUserSelect: 'none',
             touchAction: 'none',
-          }}
+          } as React.CSSProperties}
         >
           {children}
         </div>
