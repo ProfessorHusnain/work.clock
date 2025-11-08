@@ -28,10 +28,21 @@ export interface TimezoneDataset {
   timezones: TimeZoneInfo[];
 }
 
+export type ClockSkin = 
+  | "classic" 
+  | "minimal" 
+  | "swiss" 
+  | "artdeco"
+  | "neon"
+  | "wooden"
+  | "glass"
+  | "neomorphic";
+
 export interface UserPreferences {
   selected_timezones: UserTimezonePreference[];
   clock_size: "extra-small" | "small" | "large";
   theme: "light" | "dark" | "system";
+  clock_skin?: ClockSkin;
   last_sync?: string;
 }
 

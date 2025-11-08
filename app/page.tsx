@@ -2,6 +2,7 @@
 
 import { AnalogClock } from "@/components/analog-clock";
 import { ClockSizeSelector, getClockSizeInPixels } from "@/components/clock-size-selector";
+import { ClockSkinSelector } from "@/components/clock-skin-selector";
 import { TimezoneSelector } from "@/components/timezone-selector";
 import { useTimezones } from "@/lib/hooks/useTimezones";
 import { Trash2, Loader2, GripVertical } from "lucide-react";
@@ -32,6 +33,8 @@ export default function Home() {
     selectedTimezones,
     clockSize,
     setClockSize,
+    clockSkin,
+    setClockSkin,
     removeTimezone,
     reorderTimezones,
     isLoading,
@@ -147,6 +150,13 @@ export default function Home() {
               />
             </div>
             
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+              <ClockSkinSelector
+                value={clockSkin}
+                onValueChange={setClockSkin}
+              />
+            </div>
+            
             <TimezoneSelector />
           </div>
         </div>
@@ -186,6 +196,7 @@ export default function Home() {
                     cardStyling={cardStyling}
                     sizeInPixels={sizeInPixels}
                     removeTimezone={removeTimezone}
+                    clockSkin={clockSkin}
                   />
                 ))}
               </div>
@@ -199,6 +210,7 @@ export default function Home() {
                   cardStyling={cardStyling}
                   sizeInPixels={sizeInPixels}
                   activeId={activeId}
+                  clockSkin={clockSkin}
                 />
               ) : null}
             </DragOverlay>
@@ -221,6 +233,7 @@ interface ClockCardProps {
   };
   sizeInPixels: number;
   removeTimezone: (id: string) => Promise<void>;
+  clockSkin: import("@/lib/types/timezone").ClockSkin;
 }
 
 /**
@@ -241,6 +254,7 @@ function ClockCard({
   cardStyling,
   sizeInPixels,
   removeTimezone,
+  clockSkin,
 }: ClockCardProps) {
   // Use dnd-kit sortable hook directly for better control
   const {
@@ -313,6 +327,7 @@ function ClockCard({
         label={timezone.display_name || `${timezone.city}, ${timezone.country_name}`}
         timezone={timezone.timezone_id}
         size={sizeInPixels}
+        skin={clockSkin}
       />
     </div>
   );
@@ -334,13 +349,15 @@ interface ClockDragOverlayProps {
   };
   sizeInPixels: number;
   activeId: string;
+  clockSkin: import("@/lib/types/timezone").ClockSkin;
 }
 
 function ClockDragOverlay({ 
   timezones, 
   cardStyling, 
   sizeInPixels,
-  activeId
+  activeId,
+  clockSkin
 }: ClockDragOverlayProps) {
   // Find the timezone being dragged
   const activeTimezone = timezones.find((tz) => tz.id === activeId);
@@ -356,6 +373,7 @@ function ClockDragOverlay({
         label={activeTimezone.display_name || `${activeTimezone.city}, ${activeTimezone.country_name}`}
         timezone={activeTimezone.timezone_id}
         size={sizeInPixels}
+        skin={clockSkin}
       />
     </div>
   );

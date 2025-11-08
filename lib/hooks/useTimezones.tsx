@@ -1,7 +1,7 @@
 "use client";
 
 import {createContext, ReactNode, useContext, useEffect, useState} from "react";
-import {TimeZoneInfo, UserPreferences, UserTimezonePreference} from "../types/timezone";
+import {TimeZoneInfo, UserPreferences, UserTimezonePreference, ClockSkin} from "../types/timezone";
 import {storageService} from "../services/storage-service";
 import {type ClockSize} from "@/components/clock-size-selector";
 
@@ -13,6 +13,8 @@ interface TimezoneContextValue {
   // User preferences
   clockSize: ClockSize;
   setClockSize: (size: ClockSize) => void;
+  clockSkin: ClockSkin;
+  setClockSkin: (skin: ClockSkin) => void;
   
   // Actions
   addTimezone: (timezoneId: string) => Promise<void>;
@@ -77,6 +79,12 @@ export function TimezoneProvider({ children }: { children: ReactNode }) {
   const setClockSize = async (size: ClockSize) => {
     if (!userPreferences) return;
     const updated = { ...userPreferences, clock_size: size };
+    await savePreferences(updated);
+  };
+
+  const setClockSkin = async (skin: ClockSkin) => {
+    if (!userPreferences) return;
+    const updated = { ...userPreferences, clock_skin: skin };
     await savePreferences(updated);
   };
 
@@ -184,6 +192,8 @@ export function TimezoneProvider({ children }: { children: ReactNode }) {
     selectedTimezones,
     clockSize: userPreferences?.clock_size || "large",
     setClockSize,
+    clockSkin: userPreferences?.clock_skin || "classic",
+    setClockSkin,
     addTimezone,
     removeTimezone,
     reorderTimezones,
