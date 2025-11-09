@@ -110,16 +110,18 @@ jobs:
       - name: 📊 List artifacts
         shell: pwsh
         run: |
-          Write-Output "## 🪟 Windows Build Artifacts" >> $env:GITHUB_STEP_SUMMARY
-          Write-Output "" >> $env:GITHUB_STEP_SUMMARY
-          Write-Output "```" >> $env:GITHUB_STEP_SUMMARY
+          $summary = "## 🪟 Windows Build Artifacts`n`n``````n"
+          
           Get-ChildItem -Path dist-release -Recurse -File | 
             Where-Object { $_.Extension -in @('.exe', '.blockmap', '.yml') } | 
             ForEach-Object {
               $size = "{0:N2} MB" -f ($_.Length / 1MB)
-              Write-Output "$($_.Name) - $size" >> $env:GITHUB_STEP_SUMMARY
+              $summary += "$($_.Name) - $size`n"
             }
-          Write-Output "```" >> $env:GITHUB_STEP_SUMMARY
+          
+          $summary += "``````"
+          
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
 
       - name: 📤 Upload Windows artifacts
         uses: actions/upload-artifact@v4
@@ -389,4 +391,5 @@ jobs:
           find artifacts -type f \( -name "*.exe" -o -name "*.deb" -o -name "*.rpm" -o -name "*.snap" -o -name "*.tar.gz" \) | while read file; do
             echo "- \`$(basename "$file")\`" >> $GITHUB_STEP_SUMMARY
           done
+
 
